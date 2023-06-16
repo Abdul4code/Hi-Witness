@@ -8,8 +8,37 @@ function getLocation() {
     });
   }
 
-/**************************************************************** CAPTURE IMAGE ******************************************************/
+// Encryption using a key
+function encryptWithKey(data, key) {
+  const encryptedData = CryptoJS.AES.encrypt(data, key).toString();
+  return encryptedData;
+}
 
+// Decryption using a key
+function decryptWithKey(encryptedData, key) {
+  const decryptedData = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
+  return decryptedData;
+}
+
+/* getLocation().then((location) => {
+  timestamp = location.timestamp
+  latitude = location.coords.latitude
+  longitude = location.coords.longitude
+
+  data = JSON.stringify({
+    long: longitude,
+    lat: latitude,
+    time: timestamp,
+  })
+
+  encrypted = encryptWithKey(data, '12Ab')
+  console.log(encrypted)
+
+  decrypted = decryptWithKey(encrypted, '12Ab')
+  console.log(decrypted)
+})*/
+
+/**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera() {
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(function (stream) {
@@ -63,12 +92,16 @@ function startCamera() {
     
       // Insert the updated EXIF data into the image data URL
       const updatedImageDataURL = piexif.insert(updatedExifBinary, image);
-  
-      console.log(piexif.load(updatedImageDataURL))
     
       // Open the captured image with updated metadata in a new tab
-      const newTab = window.open("", "_blank");
-      newTab.document.write('<img src="' + updatedImageDataURL + '" alt="Captured Image" />');
+      html = `
+            <a href="${updatedImageDataURL}" download>
+              <div class="gal-image">
+                    <img src="${updatedImageDataURL}" />
+              </div>
+            </a>
+      `
+      $('.gallery-cont').append(html)
   })  
   }
   
