@@ -8,16 +8,6 @@ function getLocation() {
     });
   }
 
-
-
-getLocation().then((location) => {
-    timestamp = location.timestamp
-    latitude = location.coords.latitude
-    longitude = location.coords.longitude
-
-    console.log(timestamp)
-})
-
 /**************************************************************** CAPTURE IMAGE ******************************************************/
 
 function startCamera() {
@@ -38,34 +28,55 @@ function startCamera() {
       });
   }
   
-  // Capture image from the canvas
   function captureImage() {
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    
+  
     // Create a temporary canvas to display the captured image
     const tempCanvas = document.createElement("canvas");
     const tempContext = tempCanvas.getContext("2d");
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     tempContext.putImageData(imageData, 0, 0);
-    
-    // Open the captured image in a new tab
-    const image = tempCanvas.toDataURL("image/jpg");
-    const newTab = window.open("", "_blank");
-    newTab.document.write('<img src="' + image + '" alt="Captured Image" />');
-  }
-
-
-const canvas = document.getElementById("myCanvas");
-const captureButton = document.getElementById("capture-btn");
-
-captureButton.addEventListener("click", captureImage);
-
-// Start the camera when the window has loaded
-window.addEventListener("load", startCamera);
-
-
-
   
+    // Convert the image data to a data URL in JPEG format
+    const image = tempCanvas.toDataURL("image/jpeg");
+  
+    // Load the EXIF data from the image
+    const exifData = piexif.load(image);
+  
+
+    // Modify the EXIF metadata as needed
+    getLocation().then((location) => {
+      timestamp = location.timestamp
+      latitude = location.coords.latitude
+      longitude = location.coords.longitude
+  
+      exifData.Exif[piexif.ExifIFD.UserComment] = JSON.stringify({
+        long: longitude,
+        lat: latitude,
+        time: timestamp,
+      });
+    
+      // Convert the modified EXIF data back to the binary format
+      const updatedExifBinary = piexif.dump(exifData);
+    
+      // Insert the updated EXIF data into the image data URL
+      const updatedImageDataURL = piexif.insert(updatedExifBinary, image);
+  
+      console.log(piexif.load(updatedImageDataURL))
+    
+      // Open the captured image with updated metadata in a new tab
+      const newTab = window.open("", "_blank");
+      newTab.document.write('<img src="' + updatedImageDataURL + '" alt="Captured Image" />');
+  })  
+  }
+  
+  const canvas = document.getElementById("myCanvas");
+  const captureButton = document.getElementById("capture-btn");
+  
+  captureButton.addEventListener("click", captureImage);
+  
+  // Start the camera when the window has loaded
+  window.addEventListener("load", startCamera);
   
