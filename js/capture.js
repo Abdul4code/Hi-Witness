@@ -45,7 +45,9 @@ function decryptWithKey(encryptedData, key) {
 function startCamera(useFrontCamera) {
   const constraints = {
     video: {
-      facingMode: useFrontCamera ? "user" : "environment"
+      facingMode: useFrontCamera ? "user" : "environment",
+      width: { ideal: 1080 },
+      height: { ideal: 1920 }
     }
   };
 
