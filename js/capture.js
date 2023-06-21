@@ -42,6 +42,7 @@ function decryptWithKey(encryptedData, key) {
 })*/
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
+/**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
   const constraints = {
     video: {
@@ -68,62 +69,64 @@ function startCamera(useFrontCamera) {
     });
 }
 
-  
-  function captureImage() {
-    const context = canvas.getContext("2d");
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-  
-    // Create a temporary canvas to display the captured image
-    const tempCanvas = document.createElement("canvas");
-    const tempContext = tempCanvas.getContext("2d");
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    tempContext.putImageData(imageData, 0, 0);
-  
-    // Convert the image data to a data URL in JPEG format
-    const image = tempCanvas.toDataURL("image/jpeg");
-  
-    // Load the EXIF data from the image
-    const exifData = piexif.load(image);
-  
+function captureImage() {
+  const context = canvas.getContext("2d");
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    // Modify the EXIF metadata as needed
-    getLocation().then((location) => {
-      timestamp = location.timestamp
-      latitude = location.coords.latitude
-      longitude = location.coords.longitude
-  
-      exifData.Exif[piexif.ExifIFD.UserComment] = JSON.stringify({
-        long: longitude,
-        lat: latitude,
-        time: timestamp,
-      });
-    
-      // Convert the modified EXIF data back to the binary format
-      const updatedExifBinary = piexif.dump(exifData);
-    
-      // Insert the updated EXIF data into the image data URL
-      const updatedImageDataURL = piexif.insert(updatedExifBinary, image);
-    
-      // Open the captured image with updated metadata in a new tab
-      html = `
-            <a href="${updatedImageDataURL}" download>
-              <div class="gal-image">
-                    <img src="${updatedImageDataURL}" />
-              </div>
-            </a>
-      `
-      $('.gallery-cont').append(html)
-  })  
-  }
-  
-  const canvas = document.getElementById("myCanvas");
-  const captureButton = document.getElementById("capture-btn");
-  
-  captureButton.addEventListener("click", captureImage);
-  
-  // Start the camera when the window has loaded
-  window.addEventListener("load", function(){
-      startCamera(false)
+  // Create a temporary canvas to display the captured image
+  const tempCanvas = document.createElement("canvas");
+  const tempContext = tempCanvas.getContext("2d");
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  tempContext.putImageData(imageData, 0, 0);
+
+  // Convert the image data to a data URL in JPEG format
+  const image = tempCanvas.toDataURL("image/jpeg", 1.0); // Quality set to 1.0 for maximum quality
+
+  // Load the EXIF data from the image
+  const exifData = piexif.load(image);
+
+  // Modify the EXIF metadata as needed
+  getLocation().then((location) => {
+    timestamp = location.timestamp;
+    latitude = location.coords.latitude;
+    longitude = location.coords.longitude;
+
+    exifData.Exif[piexif.ExifIFD.UserComment] = JSON.stringify({
+      long: longitude,
+      lat: latitude,
+      time: timestamp,
+    });
+
+    // Convert the modified EXIF data back to the binary format
+    const updatedExifBinary = piexif.dump(exifData);
+
+    // Insert the updated EXIF data into the image data URL
+    const updatedImageDataURL = piexif.insert(updatedExifBinary, image);
+
+    // Open the captured image with updated metadata in a new tab
+    html = `
+          <a href="${updatedImageDataURL}" download>
+            <div class="gal-image">
+                  <img src="${updatedImageDataURL}" />
+            </div>
+          </a>
+    `;
+    $('.gallery-cont').append(html);
   });
+}
+
+const canvas = document.getElementById("myCanvas");
+const captureButton = document.getElementById("capture-btn");
+
+canvas.setAttribute("width", "1080"); // Set canvas width to desired image width
+canvas.setAttribute("height", "1920"); // Set canvas height to desired image height
+
+captureButton.addEventListener("click", captureImage);
+
+// Start the camera when the window has loaded
+window.addEventListener("load", function(){
+    startCamera(false);
+});
+
   
