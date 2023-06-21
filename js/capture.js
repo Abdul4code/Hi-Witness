@@ -42,7 +42,6 @@ function decryptWithKey(encryptedData, key) {
 })*/
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
-/**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
   const constraints = {
     video: {
@@ -58,10 +57,15 @@ function startCamera(useFrontCamera) {
       video.srcObject = stream;
       video.play();
 
+      const aspectRatio = constraints.video.width.ideal / constraints.video.height.ideal;
+
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.width / aspectRatio;
+
       // Draw video frames to the canvas
       const context = canvas.getContext("2d");
       setInterval(function () {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        context.drawImage(video, 0, 0, canvasWidth, canvasHeight);
       }, 16); // Adjust the interval based on your preference
     })
     .catch(function (error) {
@@ -128,5 +132,3 @@ captureButton.addEventListener("click", captureImage);
 window.addEventListener("load", function(){
     startCamera(false);
 });
-
-  
