@@ -42,6 +42,7 @@ function decryptWithKey(encryptedData, key) {
 })*/
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
+/**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
   const constraints = {
     video: {
@@ -59,12 +60,19 @@ function startCamera(useFrontCamera) {
 
       const aspectRatio = constraints.video.width.ideal / constraints.video.height.ideal;
 
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.width / aspectRatio;
+      // Calculate the dimensions for the canvas
+      let canvasWidth, canvasHeight;
+      if (video.videoWidth / video.videoHeight > aspectRatio) {
+        canvasWidth = video.videoHeight * aspectRatio;
+        canvasHeight = video.videoHeight;
+      } else {
+        canvasWidth = video.videoWidth;
+        canvasHeight = video.videoWidth / aspectRatio;
+      }
 
-      // Update video element's CSS to maintain correct aspect ratio
-      video.style.width = `${canvasWidth}px`;
-      video.style.height = `${canvasHeight}px`;
+      // Update the canvas dimensions
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
 
       // Draw video frames to the canvas
       const context = canvas.getContext("2d");
@@ -127,12 +135,10 @@ function captureImage() {
 const canvas = document.getElementById("myCanvas");
 const captureButton = document.getElementById("capture-btn");
 
-canvas.setAttribute("width", "1080"); // Set canvas width to desired image width
-canvas.setAttribute("height", "1920"); // Set canvas height to desired image height
-
 captureButton.addEventListener("click", captureImage);
 
 // Start the camera when the window has loaded
 window.addEventListener("load", function(){
     startCamera(false);
 });
+
