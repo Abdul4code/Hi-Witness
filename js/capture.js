@@ -62,6 +62,10 @@ function startCamera(useFrontCamera) {
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.width / aspectRatio;
 
+      // Update video element's CSS to maintain correct aspect ratio
+      video.style.width = `${canvasWidth}px`;
+      video.style.height = `${canvasHeight}px`;
+
       // Draw video frames to the canvas
       const context = canvas.getContext("2d");
       setInterval(function () {
