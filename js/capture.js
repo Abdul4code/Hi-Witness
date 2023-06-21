@@ -121,5 +121,7 @@ function startCamera(useFrontCamera) {
   captureButton.addEventListener("click", captureImage);
   
   // Start the camera when the window has loaded
-  window.addEventListener("load", startCamera);
+  window.addEventListener("load", function(){
+      startCamera(false)
+  });
   
