@@ -4,9 +4,12 @@ function getLocation() {
         navigator.geolocation.getCurrentPosition(resolve, reject);
       } else {
         reject("Geolocation is not supported by this browser.");
+        alert('Geolocation is not supported')
       }
     });
   }
+
+
 
 // Encryption using a key
 function encryptWithKey(data, key) {
@@ -39,23 +42,30 @@ function decryptWithKey(encryptedData, key) {
 })*/
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
-function startCamera() {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(function (stream) {
-        const video = document.createElement("video");
-        video.srcObject = stream;
-        video.play();
-  
-        // Draw video frames to the canvas
-        const context = canvas.getContext("2d");
-        setInterval(function () {
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        }, 16); // Adjust the interval based on your preference
-      })
-      .catch(function (error) {
-        alert("Error accessing camera: ", error);
-      });
-  }
+function startCamera(useFrontCamera) {
+  const constraints = {
+    video: {
+      facingMode: useFrontCamera ? "user" : "environment"
+    }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(function (stream) {
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+
+      // Draw video frames to the canvas
+      const context = canvas.getContext("2d");
+      setInterval(function () {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }, 16); // Adjust the interval based on your preference
+    })
+    .catch(function (error) {
+      alert("Error accessing camera: " + error);
+    });
+}
+
   
   function captureImage() {
     const context = canvas.getContext("2d");
