@@ -1,0 +1,77 @@
+.main-cont{
+    background-image: url('../images/bg5.png');
+    background-size: cover;
+    height: 95vh;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+}
+
+.overlay{
+    position: fixed;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.site-icon{
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 30px;
+    height: 30px;
+}
+
+.button-conts{
+    position: absolute;
+    top: 33%;
+    width: 100%;
+    text-align: center;
+}
+
+.each-button{
+    width: 30%;
+    height: 100px;
+    display: inline-block;
+    border: 2px solid rgb(3, 3, 78);
+    padding: 20px;
+    line-height: 2;
+    margin: 15px;
+    color: rgb(3, 3, 78);
+    border-radius: 5px;
+}
+
+.each-button img{
+    width: 35px;
+    height: 35px;
+}
+
+.banner{
+    position: absolute;
+    top: 54%;
+    text-align: center;
+    width: 100%;
+    font-size: 14pt;
+    font-weight:bolder;
+    color: rgb(3, 3, 78);
+}
+
+.sub-banner{
+    position: absolute;
+    top: 58%;
+    text-align: center;
+    width: 100%;
+    font-size: 9pt;
+    color: rgb(3, 3, 78);
+}
+
+#copyright{
+    font-size: 8pt;
+    color: black;
+    position: absolute;
+    bottom: 5px;
+    width: 100%;
+    text-align: center;
+    color:rgb(3, 3, 78);
+}

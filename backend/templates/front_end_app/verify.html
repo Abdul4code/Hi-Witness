@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'images/icon.png' %}" />
+    <title> Hi-Witness : Verify </title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/capture.css' %}" />
+
+    <!-- fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,100;1,200;1,300&display=swap" rel="stylesheet">
+
+    <!-- Javascript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    
+</head>
+<body>
+    <div class="main-cont container-fliud">
+        <div class="header">
+            <img src="{% static 'images/icon.png' %}" class="site-icon" />
+        </div>
+        
+        <div class="uploaded"></div>
+        <input type="file" value="" class="upload-image"/>
+
+        <textarea class='report' name="" id="" cols="30" rows="10"></textarea>
+
+        <button class="verify-btn"> Verify <img src="{% static 'images/verify.png' %}"></button>
+    </div>
+    <script src="{% static 'js/verify.js' %}"></script>
+</body>
+</html>
