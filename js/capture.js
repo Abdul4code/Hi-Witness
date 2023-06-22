@@ -127,6 +127,6 @@ captureButton.addEventListener("click", captureImage);
 
 // Start the camera when the window has loaded
 window.addEventListener("load", function(){
-    startCamera(true);
+    startCamera(false);
 });
 
