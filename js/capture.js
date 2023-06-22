@@ -17,13 +17,8 @@ function encryptWithKey(data, key) {
   return encryptedData;
 }
 
-// Decryption using a key
-function decryptWithKey(encryptedData, key) {
-  const decryptedData = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
-  return decryptedData;
-}
-
-/* getLocation().then((location) => {
+/*
+getLocation().then((location) => {
   timestamp = location.timestamp
   latitude = location.coords.latitude
   longitude = location.coords.longitude
@@ -39,10 +34,8 @@ function decryptWithKey(encryptedData, key) {
 
   decrypted = decryptWithKey(encrypted, '12Ab')
   console.log(decrypted)
-})*/
+}) */
 
-/**************************************************************** CAPTURE IMAGE ******************************************************/
-/**************************************************************** CAPTURE IMAGE ******************************************************/
 /**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
   const constraints = {
@@ -93,11 +86,15 @@ function captureImage() {
     latitude = location.coords.latitude;
     longitude = location.coords.longitude;
 
-    exifData.Exif[piexif.ExifIFD.UserComment] = JSON.stringify({
+    data = JSON.stringify({
       long: longitude,
       lat: latitude,
       time: timestamp,
-    });
+    })
+  
+    encrypted = encryptWithKey(data, '12Ab')
+
+    exifData.Exif[piexif.ExifIFD.UserComment] = encrypted
 
     // Convert the modified EXIF data back to the binary format
     const updatedExifBinary = piexif.dump(exifData);
@@ -127,6 +124,6 @@ captureButton.addEventListener("click", captureImage);
 
 // Start the camera when the window has loaded
 window.addEventListener("load", function(){
-    startCamera(false);
+    startCamera(true);
 });
 
