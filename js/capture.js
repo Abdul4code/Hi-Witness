@@ -43,6 +43,7 @@ function decryptWithKey(encryptedData, key) {
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
 /**************************************************************** CAPTURE IMAGE ******************************************************/
+/**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
   const constraints = {
     video: {
@@ -58,26 +59,10 @@ function startCamera(useFrontCamera) {
       video.srcObject = stream;
       video.play();
 
-      const aspectRatio = constraints.video.width.ideal / constraints.video.height.ideal;
-
-      // Calculate the dimensions for the canvas
-      let canvasWidth, canvasHeight;
-      if (video.videoWidth / video.videoHeight > aspectRatio) {
-        canvasWidth = video.videoHeight * aspectRatio;
-        canvasHeight = video.videoHeight;
-      } else {
-        canvasWidth = video.videoWidth;
-        canvasHeight = video.videoWidth / aspectRatio;
-      }
-
-      // Update the canvas dimensions
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-
       // Draw video frames to the canvas
       const context = canvas.getContext("2d");
       setInterval(function () {
-        context.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
       }, 16); // Adjust the interval based on your preference
     })
     .catch(function (error) {
@@ -135,10 +120,13 @@ function captureImage() {
 const canvas = document.getElementById("myCanvas");
 const captureButton = document.getElementById("capture-btn");
 
+canvas.width = 1920; // Set canvas width to desired image width
+canvas.height = 1080; // Set canvas height to desired image height
+
 captureButton.addEventListener("click", captureImage);
 
 // Start the camera when the window has loaded
 window.addEventListener("load", function(){
-    startCamera(false);
+    startCamera(true);
 });
 
