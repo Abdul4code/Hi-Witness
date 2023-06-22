@@ -120,8 +120,8 @@ function captureImage() {
 const canvas = document.getElementById("myCanvas");
 const captureButton = document.getElementById("capture-btn");
 
-canvas.width = 1920; // Set canvas width to desired image width
-canvas.height = 1080; // Set canvas height to desired image height
+canvas.width = 1000; // Set canvas width to desired image width
+canvas.height = 1000; // Set canvas height to desired image height
 
 captureButton.addEventListener("click", captureImage);
 
