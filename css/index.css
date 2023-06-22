@@ -1,8 +1,8 @@
 .main-cont{
     background-image: url(../images/bg5.png);
     background-size: cover;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     font-family: 'Poppins', sans-serif;
 }
 
