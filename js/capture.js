@@ -42,12 +42,13 @@ function decryptWithKey(encryptedData, key) {
 })*/
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
+/**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
   const constraints = {
     video: {
       facingMode: useFrontCamera ? "user" : "environment",
-      width: { ideal: 1080 },
-      height: { ideal: 1920 }
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
     }
   };
 
@@ -57,8 +58,17 @@ function startCamera(useFrontCamera) {
       video.srcObject = stream;
       video.play();
 
-      const canvasWidth = video.videoWidth;
-      const canvasHeight = video.videoHeight;
+      const aspectRatio = constraints.video.width.ideal / constraints.video.height.ideal;
+
+      // Calculate the dimensions for the canvas
+      let canvasWidth, canvasHeight;
+      if (video.videoWidth / video.videoHeight > aspectRatio) {
+        canvasWidth = video.videoHeight * aspectRatio;
+        canvasHeight = video.videoHeight;
+      } else {
+        canvasWidth = video.videoWidth;
+        canvasHeight = video.videoWidth / aspectRatio;
+      }
 
       // Update the canvas dimensions
       canvas.width = canvasWidth;
@@ -131,5 +141,4 @@ captureButton.addEventListener("click", captureImage);
 window.addEventListener("load", function(){
     startCamera(false);
 });
-
 
