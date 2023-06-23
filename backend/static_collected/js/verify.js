@@ -1,8 +1,30 @@
+alert()
+
 // Decryption using a key
 function decryptWithKey(encryptedData, key) {
     const decryptedData = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
     return decryptedData;
 }
+
+// Getting the encryption key
+async function get_enc_key() {
+    return new Promise((resolve, reject) => {
+      $.get('api/key', function(key) {
+        resolve(key);
+      }).fail(function() {
+        reject(new Error('Failed to retrieve encryption key'));
+      });
+    });
+  }
+  
+  function get_enc_key() {
+    return $.ajax({
+      url: 'api/key',
+      type: 'GET',
+      async: false
+    }).responseText;
+  }
+  
 
 report = {}
   
@@ -25,30 +47,39 @@ $(document).ready(function() {
                 // Get the EXIF metadata using the exif.js library
                 var exifData = EXIF.getData(file, function() {
                     encrypted_data = this['exifdata']['UserComment']
+
+                    const key =  JSON.parse(get_enc_key())['key']
+
+                    encrypted = encryptWithKey(data, key)
+
+                    console.log('Decryption key ' + key)
+                    console.log('Encyption data ' + encrypted)
                     
-                    try {
-                        raw_data = decrypted = decryptWithKey(encrypted_data, '12Ab')
+                    
+                    // try {
+                    //     raw_data = decrypted = decryptWithKey(encrypted_data, key)
+                    //     console.log('dencyption text ' + raw_data)
+
+                    //     if(raw_data != ""){
+                    //         report['meta'] = {'success': true, 
+                    //                       'message': `Image meta-data unaltered`}
+                    //     }else{
+                    //         report['meta'] = {
+                    //             'success': false, 
+                    //             'message': `The Image Meta-Data has been compromised. 
+                    //             This is a compromised Image. Please submit 
+                    //             an image captured with Hi-witness and untempred meta-data`
+                    //         }
+                    //     }
                         
-                        if(raw_data != ""){
-                            report['meta'] = {'success': true, 
-                                          'message': `Image meta-data unaltered`}
-                        }else{
-                            report['meta'] = {
-                                'success': false, 
-                                'message': `The Image Meta-Data has been compromised. 
-                                This is a compromised Image. Please submit 
-                                an image captured with Hi-witness and untempred meta-data`
-                            }
-                        }
-                        
-                    }catch (error) {
-                        report['meta'] = {
-                                            'success': false, 
-                                            'message': `The Image Meta-Data has been compromised. 
-                                            This is a compromised Image. Please submit 
-                                            an image captured with Hi-witness and untempred meta-data`
-                                        }
-                    }
+                    // }catch (error) {
+                    //     report['meta'] = {
+                    //                         'success': false, 
+                    //                         'message': `The Image Meta-Data has been compromised. 
+                    //                         This is a compromised Image. Please submit 
+                    //                         an image captured with Hi-witness and untempred meta-data`
+                    //                     }
+                    // }
 
                     console.log(report)
                 });                
@@ -88,7 +119,7 @@ $(document).ready(function() {
 
     // Send the image data to the API using AJAX
     $.ajax({
-      url: 'http://127.0.0.1:8000/api/upload/',  // Replace with your API endpoint URL
+      url: 'api/predict',  // Replace with your API endpoint URL
       type: 'POST',
       data: formData,
       contentType: false,

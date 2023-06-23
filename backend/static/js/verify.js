@@ -4,6 +4,90 @@ function decryptWithKey(encryptedData, key) {
     return decryptedData;
 }
 
+// Getting the encryption key
+async function get_enc_key() {
+    return new Promise((resolve, reject) => {
+      $.get('api/key', function(key) {
+        resolve(key);
+      }).fail(function() {
+        reject(new Error('Failed to retrieve encryption key'));
+      });
+    });
+  }
+  
+  function get_enc_key() {
+    return $.ajax({
+      url: 'api/key',
+      type: 'GET',
+      async: false
+    }).responseText;
+  }
+
+  function check_report(){
+    report_str = $(".report").val()
+    if(report_str == ""){
+        Swal.fire({
+            title: 'Error',
+            text: 'Please provide the eyewitness report.',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        return false
+    }else{
+        return true
+    }
+  }
+
+  function check_image(){
+    image = $('.upload-image').val()
+    if(image == ""){
+        Swal.fire({
+            title: 'Error',
+            text: 'Please upload an image',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          return false
+    }else{
+        return true
+    }
+  }
+
+  function check_type(){
+    var imageFile = $('.upload-image')[0].files[0];
+
+    // get the fileType
+    var fileType = imageFile.type;
+
+    // Check if the file type is an image
+    if (fileType.startsWith('image/')) {
+        if (fileType === 'image/jpeg') {
+            return true
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'Uplaod a jpg Image captured with Hi-Witness',
+                icon: 'error',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            return false
+        }
+    } else {
+        Swal.fire({
+            title: 'Error',
+            text: 'The uploaded file is not an image',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+        });
+        return false
+    }
+  }
+  
+
 report = {}
   
 $(document).ready(function() {
@@ -25,32 +109,28 @@ $(document).ready(function() {
                 // Get the EXIF metadata using the exif.js library
                 var exifData = EXIF.getData(file, function() {
                     encrypted_data = this['exifdata']['UserComment']
+
+                    const key =  JSON.parse(get_enc_key())['key']
                     
                     try {
-                        raw_data = decrypted = decryptWithKey(encrypted_data, '12Ab')
-                        
+                        raw_data =  decryptWithKey(encrypted_data, key)
+
                         if(raw_data != ""){
                             report['meta'] = {'success': true, 
                                           'message': `Image meta-data unaltered`}
                         }else{
                             report['meta'] = {
                                 'success': false, 
-                                'message': `The Image Meta-Data has been compromised. 
-                                This is a compromised Image. Please submit 
-                                an image captured with Hi-witness and untempred meta-data`
+                                'message': `The Image meta-data has been Compromised`
                             }
                         }
                         
                     }catch (error) {
                         report['meta'] = {
                                             'success': false, 
-                                            'message': `The Image Meta-Data has been compromised. 
-                                            This is a compromised Image. Please submit 
-                                            an image captured with Hi-witness and untempred meta-data`
+                                            'message': `The system cannot verify the image meta-data`
                                         }
                     }
-
-                    console.log(report)
                 });                
                 
                 // Create an image element
@@ -74,37 +154,45 @@ $(document).ready(function() {
 
 /********************************************************* Verify news content */
 // Handle image upload form submission
-  $('.verify-btn').on('click', function(e) {
+$('.verify-btn').on('click', function(e){
     e.preventDefault();
-
-    // Get the selected image file from the file input
-    var imageFile = $('.upload-image')[0].files[0];
-
-    // Create a FormData object to store the image data
-    var formData = new FormData();
-    formData.append('image', imageFile);
-
-    console.log(imageFile)
-
-    // Send the image data to the API using AJAX
-    $.ajax({
-      url: 'http://127.0.0.1:8000/api/upload/',  // Replace with your API endpoint URL
-      type: 'POST',
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function(response) {
-        // Handle the API response
-        console.log(response);  // You can customize this based on your requirements
-        alert('Image uploaded successfully');
-      },
-      error: function(xhr, status, error) {
-        // Handle any errors
-        console.error(xhr, status, error);
-        alert('Error uploading image');
-      }
   
-    });
-  });
+    // check if there is an image entered and a text written
+    if (check_report() && check_image() && check_type()) {
+        // Get the selected image file from the file input
+        var imageFile = $('.upload-image')[0].files[0];
+       
+      // Create a FormData object to store the image data
+      var formData = new FormData();
+      formData.append('image', imageFile);
+  
+      // Send the image data to the API using AJAX
+      $.ajax({
+        url: 'api/predict',  // Replace with your API endpoint URL
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            report['auth'] = {
+                'success': true, 
+                'message': response.message
+            }
 
-});
+            console.log(report)
+        },
+        error: function(xhr, status, error) {
+          // Handle any errors
+          console.error(xhr, status, error);
+          Swal.fire({
+            title: 'Error',
+            text: 'Error uploading image',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        }
+      });
+    }
+  });
+})  

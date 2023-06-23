@@ -17,24 +17,13 @@ function encryptWithKey(data, key) {
   return encryptedData;
 }
 
-/*
-getLocation().then((location) => {
-  timestamp = location.timestamp
-  latitude = location.coords.latitude
-  longitude = location.coords.longitude
-
-  data = JSON.stringify({
-    long: longitude,
-    lat: latitude,
-    time: timestamp,
-  })
-
-  encrypted = encryptWithKey(data, '12Ab')
-  console.log(encrypted)
-
-  decrypted = decryptWithKey(encrypted, '12Ab')
-  console.log(decrypted)
-}) */
+function get_enc_key() {
+  return $.ajax({
+    url: 'api/key',
+    type: 'GET',
+    async: false
+  }).responseText;
+}
 
 /**************************************************************** CAPTURE IMAGE ******************************************************/
 function startCamera(useFrontCamera) {
@@ -92,10 +81,18 @@ function captureImage() {
       time: timestamp,
     })
   
-    encrypted = encryptWithKey(data, '12Ab')
+    const key =  JSON.parse(get_enc_key())['key']
+
+    encrypted = encryptWithKey(data, key)
+
+    console.log('Encyption key ' + key)
+    console.log('Encyption data ' + data)
+    console.log('Encyption text ' + encrypted)
+    
 
     exifData.Exif[piexif.ExifIFD.UserComment] = encrypted
 
+    console.log('Meta data ', exifData)
     // Convert the modified EXIF data back to the binary format
     const updatedExifBinary = piexif.dump(exifData);
 

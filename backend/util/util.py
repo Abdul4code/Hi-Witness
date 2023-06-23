@@ -33,11 +33,14 @@ def image_to_ela(image, quality):
 
     # Resize the ELA image to 150 x 150
     ela_image = ela_image.resize((150, 150))
-
+    
     # Convert the ELA image to a NumPy array
     ela_array = np.array(ela_image)
+    ela_array = ela_array.reshape(-1, 150, 150, 3)
 
     return ela_array
+
+
 
 def predict(ela_image, model):
     return model.predict(ela_image)
