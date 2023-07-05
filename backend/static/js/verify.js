@@ -89,6 +89,7 @@ async function get_enc_key() {
   
 
 report = {}
+raw_data = ""
   
 $(document).ready(function() {
     // Listen for the change event on the file input element
@@ -114,6 +115,7 @@ $(document).ready(function() {
                     
                     try {
                         raw_data =  decryptWithKey(encrypted_data, key)
+                        console.log(raw_data)
 
                         if(raw_data != ""){
                             report['meta'] = {'success': true, 
@@ -178,8 +180,6 @@ $('.verify-btn').on('click', function(e){
                 'success': true, 
                 'message': response.message
             }
-
-            console.log(report)
         },
         error: function(xhr, status, error) {
           // Handle any errors
@@ -193,6 +193,24 @@ $('.verify-btn').on('click', function(e){
           });
         }
       });
+
+      if(raw_data){
+          $.post('api/compare', {'meta': raw_data, 'report': report_str = $(".report").val()}, function(result){
+            report['compare'] = {
+              'success': true, 
+              'message': result
+            }
+          })
+
+          console.log(report)
+      }else{
+          report['compare'] = {
+            'success': false, 
+            'message': 'failed to verify report'
+          }
+          console.log(report)
+      }
+      
     }
   });
 })  
