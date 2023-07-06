@@ -1,3 +1,6 @@
+report = {}
+raw_data = ""
+
 // Decryption using a key
 function decryptWithKey(encryptedData, key) {
     const decryptedData = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
@@ -86,11 +89,41 @@ async function get_enc_key() {
         return false
     }
   }
-  
 
-report = {}
-raw_data = ""
+  function get_result(raw_data) {
+    if (raw_data) {
+      $.post('api/compare', {'meta': raw_data, 'report': $(".report").val()}, function(result) {
+        // Use the global 'report' variable explicitly
+        report['compare'] = {
+          'success': true, 
+          'message': result
+        }
   
+        // Convert the JSON object to a string
+        var reportData = JSON.stringify(report);
+  
+        // Store the string in localStorage
+        localStorage.setItem('report', reportData);
+
+        // redirect to the result page
+        window.location.href = 'result';
+
+      })
+    } else {
+      // Use the global 'report' variable explicitly
+      report['compare'] = {
+        'success': false, 
+        'message': 'This report cannot be verified because of non-existent or altered meta-data'
+      }
+
+      // Convert the JSON object to a string
+      var reportData = JSON.stringify(report);
+  
+      // Store the string in localStorage
+      localStorage.setItem('report', reportData);
+    }
+  }
+
 $(document).ready(function() {
     // Listen for the change event on the file input element
     $('.upload-image').change(function(e) {
@@ -115,22 +148,22 @@ $(document).ready(function() {
                     
                     try {
                         raw_data =  decryptWithKey(encrypted_data, key)
-                        console.log(raw_data)
 
                         if(raw_data != ""){
                             report['meta'] = {'success': true, 
-                                          'message': `Image meta-data unaltered`}
+                                          'message': `The Image metadata has been verified. It contains unaltered information.`}
                         }else{
                             report['meta'] = {
                                 'success': false, 
-                                'message': `The Image meta-data has been Compromised`
+                                'message': `The Image has failed the metadata verification. It contains compromised or doctored metadata`
                             }
                         }
                         
                     }catch (error) {
                         report['meta'] = {
                                             'success': false, 
-                                            'message': `The system cannot verify the image meta-data`
+                                            'message': `The system cannot verify the image meta-data. This happens on situations where the
+                                            image has not been captured with the hi-witness application`
                                         }
                     }
                 });                
@@ -180,6 +213,8 @@ $('.verify-btn').on('click', function(e){
                 'success': true, 
                 'message': response.message
             }
+
+            get_result(raw_data, report)
         },
         error: function(xhr, status, error) {
           // Handle any errors
@@ -193,23 +228,6 @@ $('.verify-btn').on('click', function(e){
           });
         }
       });
-
-      if(raw_data){
-          $.post('api/compare', {'meta': raw_data, 'report': report_str = $(".report").val()}, function(result){
-            report['compare'] = {
-              'success': true, 
-              'message': result
-            }
-          })
-
-          console.log(report)
-      }else{
-          report['compare'] = {
-            'success': false, 
-            'message': 'failed to verify report'
-          }
-          console.log(report)
-      }
       
     }
   });

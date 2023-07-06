@@ -35,7 +35,9 @@ class KeyView(APIView):
 
 class Verify_news(APIView):
     def post(self, request):
+        
         serializer = StringSerializer(data=request.data)
+        
         if serializer.is_valid():
             meta = json.loads(serializer.validated_data.get('meta', ''))
             report = serializer.validated_data.get('report', '')
@@ -43,14 +45,15 @@ class Verify_news(APIView):
             place = get_place_name(meta['long'] , meta['lat'])
             time = get_time(meta['time'])
             summary = summarize_report(report)
-            
             results = compare(place, time, summary)
-            
-            print(results)
 
             response_data = {
-                'meta': meta, 'report':report
+                "place": place,
+                "time": time,
+                "summary": summary,
+                "results": results
             }
+            
             return Response(response_data)
         else:
             return Response(serializer.errors, status=400)

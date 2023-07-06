@@ -8,7 +8,7 @@ import tensorflow as tf
 import openai
 import datetime
 
-openai.api_key = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+openai.api_key = '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'
 
 
 def image_to_ela(image, quality):
@@ -124,7 +124,7 @@ def summarize_report(report):
 def compare(place, time, summary):
     prompt = ''' 
                 Answer the following question. 
-                1. True or false, Is {} same place with or somewhere located within {}?
+                1. Answer True or false, Is {} same place with or somewhere located within {}?
                 2. True or false, Is {} same with {}?
                 3. True or false, is {} same with {}?
                 4. True or false, is {} same with {}
@@ -134,8 +134,9 @@ def compare(place, time, summary):
                 
                  Here is the instruction for answering the questions; 
                 
-                - For questions where one of the comparing values is unknown, respond with unknown
-                - Just say the answer straight forward in one value or word 
+                - For questions where one of the provided values is unknown, respond with unknown
+                - Just answer True, false, percentage or Unknown. Dont provide explanations
+                - Number your response
             '''.format( 
                 place, summary[0],
                 time['year'] , summary[1],

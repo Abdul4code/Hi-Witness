@@ -11,3 +11,6 @@ def capture(request):
 
 def verify(request):
     return render(request, 'front_end_app\\verify.html')
+
+def result(request):
+    return render(request, 'front_end_app\\result.html')

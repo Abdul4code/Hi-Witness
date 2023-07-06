@@ -1,4 +1,5 @@
-alert()
+report = {}
+raw_data = ""
 
 // Decryption using a key
 function decryptWithKey(encryptedData, key) {
@@ -24,10 +25,105 @@ async function get_enc_key() {
       async: false
     }).responseText;
   }
-  
 
-report = {}
+  function check_report(){
+    report_str = $(".report").val()
+    if(report_str == ""){
+        Swal.fire({
+            title: 'Error',
+            text: 'Please provide the eyewitness report.',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        return false
+    }else{
+        return true
+    }
+  }
+
+  function check_image(){
+    image = $('.upload-image').val()
+    if(image == ""){
+        Swal.fire({
+            title: 'Error',
+            text: 'Please upload an image',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          return false
+    }else{
+        return true
+    }
+  }
+
+  function check_type(){
+    var imageFile = $('.upload-image')[0].files[0];
+
+    // get the fileType
+    var fileType = imageFile.type;
+
+    // Check if the file type is an image
+    if (fileType.startsWith('image/')) {
+        if (fileType === 'image/jpeg') {
+            return true
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'Uplaod a jpg Image captured with Hi-Witness',
+                icon: 'error',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            return false
+        }
+    } else {
+        Swal.fire({
+            title: 'Error',
+            text: 'The uploaded file is not an image',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+        });
+        return false
+    }
+  }
+
+  function get_result(raw_data) {
+    if (raw_data) {
+      $.post('api/compare', {'meta': raw_data, 'report': $(".report").val()}, function(result) {
+        // Use the global 'report' variable explicitly
+        report['compare'] = {
+          'success': true, 
+          'message': result
+        }
   
+        // Convert the JSON object to a string
+        var reportData = JSON.stringify(report);
+  
+        // Store the string in localStorage
+        localStorage.setItem('report', reportData);
+
+        // redirect to the result page
+        window.location.href = 'result';
+
+      })
+    } else {
+      // Use the global 'report' variable explicitly
+      report['compare'] = {
+        'success': false, 
+        'message': 'failed to verify report'
+      }
+
+      // Convert the JSON object to a string
+      var reportData = JSON.stringify(report);
+  
+      // Store the string in localStorage
+      localStorage.setItem('report', reportData);
+    }
+  }
+
 $(document).ready(function() {
     // Listen for the change event on the file input element
     $('.upload-image').change(function(e) {
@@ -49,39 +145,26 @@ $(document).ready(function() {
                     encrypted_data = this['exifdata']['UserComment']
 
                     const key =  JSON.parse(get_enc_key())['key']
-
-                    encrypted = encryptWithKey(data, key)
-
-                    console.log('Decryption key ' + key)
-                    console.log('Encyption data ' + encrypted)
                     
-                    
-                    // try {
-                    //     raw_data = decrypted = decryptWithKey(encrypted_data, key)
-                    //     console.log('dencyption text ' + raw_data)
+                    try {
+                        raw_data =  decryptWithKey(encrypted_data, key)
 
-                    //     if(raw_data != ""){
-                    //         report['meta'] = {'success': true, 
-                    //                       'message': `Image meta-data unaltered`}
-                    //     }else{
-                    //         report['meta'] = {
-                    //             'success': false, 
-                    //             'message': `The Image Meta-Data has been compromised. 
-                    //             This is a compromised Image. Please submit 
-                    //             an image captured with Hi-witness and untempred meta-data`
-                    //         }
-                    //     }
+                        if(raw_data != ""){
+                            report['meta'] = {'success': true, 
+                                          'message': `Image meta-data unaltered`}
+                        }else{
+                            report['meta'] = {
+                                'success': false, 
+                                'message': `The Image meta-data has been Compromised`
+                            }
+                        }
                         
-                    // }catch (error) {
-                    //     report['meta'] = {
-                    //                         'success': false, 
-                    //                         'message': `The Image Meta-Data has been compromised. 
-                    //                         This is a compromised Image. Please submit 
-                    //                         an image captured with Hi-witness and untempred meta-data`
-                    //                     }
-                    // }
-
-                    console.log(report)
+                    }catch (error) {
+                        report['meta'] = {
+                                            'success': false, 
+                                            'message': `The system cannot verify the image meta-data`
+                                        }
+                    }
                 });                
                 
                 // Create an image element
@@ -105,37 +188,45 @@ $(document).ready(function() {
 
 /********************************************************* Verify news content */
 // Handle image upload form submission
-  $('.verify-btn').on('click', function(e) {
+$('.verify-btn').on('click', function(e){
     e.preventDefault();
-
-    // Get the selected image file from the file input
-    var imageFile = $('.upload-image')[0].files[0];
-
-    // Create a FormData object to store the image data
-    var formData = new FormData();
-    formData.append('image', imageFile);
-
-    console.log(imageFile)
-
-    // Send the image data to the API using AJAX
-    $.ajax({
-      url: 'api/predict',  // Replace with your API endpoint URL
-      type: 'POST',
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function(response) {
-        // Handle the API response
-        console.log(response);  // You can customize this based on your requirements
-        alert('Image uploaded successfully');
-      },
-      error: function(xhr, status, error) {
-        // Handle any errors
-        console.error(xhr, status, error);
-        alert('Error uploading image');
-      }
   
-    });
+    // check if there is an image entered and a text written
+    if (check_report() && check_image() && check_type()) {
+        // Get the selected image file from the file input
+        var imageFile = $('.upload-image')[0].files[0];
+       
+      // Create a FormData object to store the image data
+      var formData = new FormData();
+      formData.append('image', imageFile);
+  
+      // Send the image data to the API using AJAX
+      $.ajax({
+        url: 'api/predict',  // Replace with your API endpoint URL
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            report['auth'] = {
+                'success': true, 
+                'message': response.message
+            }
+            get_result(raw_data, report)
+        },
+        error: function(xhr, status, error) {
+          // Handle any errors
+          console.error(xhr, status, error);
+          Swal.fire({
+            title: 'Error',
+            text: 'Error uploading image',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        }
+      });
+      
+    }
   });
-
-});
+})  
