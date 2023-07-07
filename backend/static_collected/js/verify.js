@@ -113,7 +113,7 @@ async function get_enc_key() {
       // Use the global 'report' variable explicitly
       report['compare'] = {
         'success': false, 
-        'message': 'failed to verify report'
+        'message': 'This report cannot be verified because of non-existent or altered meta-data'
       }
 
       // Convert the JSON object to a string
@@ -151,18 +151,19 @@ $(document).ready(function() {
 
                         if(raw_data != ""){
                             report['meta'] = {'success': true, 
-                                          'message': `Image meta-data unaltered`}
+                                          'message': `The Image metadata has been verified. It contains unaltered information.`}
                         }else{
                             report['meta'] = {
                                 'success': false, 
-                                'message': `The Image meta-data has been Compromised`
+                                'message': `The Image has failed the metadata verification. It contains compromised or doctored metadata`
                             }
                         }
                         
                     }catch (error) {
                         report['meta'] = {
                                             'success': false, 
-                                            'message': `The system cannot verify the image meta-data`
+                                            'message': `The system cannot verify the image meta-data. This happens on situations where the
+                                            image has not been captured with the hi-witness application`
                                         }
                     }
                 });                
@@ -212,6 +213,7 @@ $('.verify-btn').on('click', function(e){
                 'success': true, 
                 'message': response.message
             }
+
             get_result(raw_data, report)
         },
         error: function(xhr, status, error) {

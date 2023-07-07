@@ -7,9 +7,34 @@ import pickle
 import tensorflow as tf
 import openai
 import datetime
+from geopy.distance import geodesic
+import re
 
-openai.api_key = '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'
+openai.api_key = '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'
 
+
+
+def is_location_within_bounds(lat, lon, min_lat, max_lat, min_lon, max_lon):
+    target_point = (lat, lon)
+    sw_point = (min_lat, min_lon)
+    ne_point = (max_lat, max_lon)
+
+    distance_lat = geodesic(target_point, (target_point[0], sw_point[1])).meters
+    distance_lon = geodesic(target_point, (sw_point[0], target_point[1])).meters
+
+    within_bounds = (
+        sw_point[0] <= lat <= ne_point[0] and
+        sw_point[1] <= lon <= ne_point[1] and
+        distance_lat <= geodesic(sw_point, ne_point).meters and
+        distance_lon <= geodesic(sw_point, ne_point).meters
+    )
+
+    return within_bounds
+
+def extract_numbers(string):
+    pattern = r"\d+"  # Matches one or more digits
+    matches = re.findall(pattern, string)
+    return matches
 
 def image_to_ela(image, quality):
     # Create a PIL Image object from the 'InMemoryUploadedFile'
@@ -96,6 +121,7 @@ def summarize_report(report):
                 5. Compute from the report the hour the event occur?
                 6. Compute from the report the minute the event occur?
                 7. Compute from the report if the event happen in AM or PM?
+                8. What is the Latitude and longitude of the place where the event occured?
                 
                 
                 Here is the instruction for answering the questions; 
@@ -121,31 +147,20 @@ def summarize_report(report):
 
     return data
 
-def compare(place, time, summary):
+def compare(coords, place, time, summary):
     prompt = ''' 
-                Answer the following question. 
-                1. Answer True or false, Is {} same place with or somewhere located within {}?
-                2. True or false, Is {} same with {}?
-                3. True or false, is {} same with {}?
-                4. True or false, is {} same with {}
-                5. On a percentage scale where 100% signifies equality and for every one hour difference subtract 50% from your answer. How accurate is {} equal to {}?
-                6. For every  1 min difference subtract 4%. How accurate is {} equal to {}?
-                7. True or False, is {} same with {} 
+                What is the bounding latitude and longitude of {}?
                 
                  Here is the instruction for answering the questions; 
                 
-                - For questions where one of the provided values is unknown, respond with unknown
-                - Just answer True, false, percentage or Unknown. Dont provide explanations
-                - Number your response
-            '''.format( 
-                place, summary[0],
-                time['year'] , summary[1],
-                time['month'], summary[2],
-                time['day'], summary[3],
-                time['hour'], summary[4],
-                time['min'], summary[5],
-                time['meridian'], summary[6]
-            )
+                Provide your answer in this format
+                1. Minimum Latitude
+                2. Maximum Latitude
+                3. Minimum Longitude
+                4. Maximum Latitude
+                
+                Just provide the numeric values without explanations i.e 1. value \n 2. value etc.
+            '''.format(place)
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -153,8 +168,37 @@ def compare(place, time, summary):
                 {"role": "user", "content": prompt},     
             ]
     )
-
-    #  lines = data.strip().splitlines()
-    # data = [line.split('. ', 1)[1] for line in lines]
+    
     data = (response['choices'][0]['message'].content)
-    return data
+
+    lines = data.strip().splitlines()
+    
+    try:
+        data = [line.split('. ', 1)[1].split(':')[1] for line in lines]
+    except:
+        data = [line.split('. ', 1)[1] for line in lines]
+        
+    print(type(coords[0]), type(coords[1]))
+    print(time)
+    print(summary)
+    
+    place_compare = is_location_within_bounds(coords[0], coords[1], float(data[0]), float(data[1]), float(data[2]), float(data[3]))
+    year_compare = time['year'] == summary[1]
+    month_compare = time['month'] == summary[2].replace('.', '')
+    day_compare = time['day'] == summary[3]
+    
+    try:
+        hour_compare = abs((extract_numbers(time['hour'])[0] - extract_numbers(summary[4])[0])) * 50
+        hour_compare = 0 if hour_compare > 100 else 100 - hour_compare
+    except:
+        hour_compare = False
+    
+    try:
+        minute_compare = abs((extract_numbers(time['min'])[0] - extract_numbers(summary[5])[0])) * 4
+        minute_compare = 0 if minute_compare > 100 else 100 - minute_compare
+    except:
+        minute_compare = False
+        
+    period_compare = time['meridian'] == summary[6]
+    
+    return [place_compare, year_compare, month_compare, day_compare, hour_compare, minute_compare, period_compare]

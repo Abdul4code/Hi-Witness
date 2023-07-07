@@ -45,7 +45,7 @@ class Verify_news(APIView):
             place = get_place_name(meta['long'] , meta['lat'])
             time = get_time(meta['time'])
             summary = summarize_report(report)
-            results = compare(place, time, summary)
+            results = compare([float(meta['lat']), float(meta['long'])], place, time, summary)
 
             response_data = {
                 "place": place,
@@ -53,6 +53,8 @@ class Verify_news(APIView):
                 "summary": summary,
                 "results": results
             }
+            
+            print(response_data)
             
             return Response(response_data)
         else:

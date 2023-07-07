@@ -38,7 +38,14 @@
 
         <div class="rep-sec meta-data">
             <div class="header"><div class="head-icon"> <img src="{% static 'images/metadata.png' %}" alt="" class="rep-icon" /></div> Meta Data </div>
-            <div class=" cont meta-cont"> The meta-data of the image is verified to be unaltered. </div>
+            <div class=" cont meta-cont"> </div>
+            <div class="mark-icon"><img src="{% static 'images/correct.png' %}" alt="" class="mark-image"></div>
+            <div class="mark-perc"> 100% </div>
+        </div>
+
+        <div class="rep-sec manipulated">
+            <div class="header"><div class="head-icon"> <img src="{% static 'images/authenticity.png' %}" alt="" class="rep-icon" /></div> Image Authenticity </div>
+            <div class="cont manipulated-cont"> </div>
             <div class="mark-icon"><img src="{% static 'images/correct.png' %}" alt="" class="mark-image"></div>
             <div class="mark-perc"> 100% </div>
         </div>
@@ -46,23 +53,7 @@
         <div class="rep-sec location">
             <div class="header"><span class="head-icon"> <img src="{% static 'images/location.png' %}" alt="" class="rep-icon" /></span> Location Compare </div>
             <div class="cont loc-cont">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-dark">
-                      <tr>
-                        <th>Image Content</th>
-                        <th>Report Content</th>
-                        <th>Match</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Niger</td>
-                        <td>Lagos</td>
-                        <td>False</td>
-                      </tr>
-                      <tr>
-                    </tbody>
-                  </table>
+                
             </div>
             <div class="mark-icon"><img src="{% static 'images/cross.png' %}" alt="" class="mark-image"></div>
             <div class="mark-perc"> 0% </div>
@@ -71,49 +62,7 @@
         <div class="rep-sec time">
             <div class="header"><span class="head-icon"> <img src="{% static 'images/clock.png' %}" alt="" class="rep-icon" /></span> Time Compare </div>
             <div class="cont time-cont">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-dark">
-                      <tr>
-                        <th>Time Param</th>
-                        <th>Image Content</th>
-                        <th>Report Content</th>
-                        <th>Match</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Year</td>
-                            <td>2023</td>
-                            <td>2023</td>
-                            <td>100%</td>
-                        </tr>
-                        <tr>
-                            <td>Month</td>
-                            <td>September</td>
-                            <td>August</td>
-                            <td>0%</td>
-                        </tr>
-                        <tr>
-                            <td>Day</td>
-                            <td>Monday</td>
-                            <td>Monday</td>
-                            <td>0%</td>
-                        </tr>
-                        <tr>
-                            <td>Hours</td>
-                            <td>7</td>
-                            <td>5</td>
-                            <td>50%</td>
-                        </tr>
-                        <tr>
-                            <td>Mins</td>
-                            <td>45</td>
-                            <td>10</td>
-                            <td>50%</td>
-                            </tr>
-                        <tr>
-                    </tbody>
-                  </table>
+                
             </div>
             <div class="mark-icon"><img src="{% static 'images/cross.png' %}" alt="" class="mark-image"></div>
             <div class="mark-perc"> 100% </div>
