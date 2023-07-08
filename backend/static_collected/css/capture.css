@@ -104,3 +104,15 @@
     height: 15px;
     color: white;
 }
+
+.modal{
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    z-index: 1000;
+    background-color: red;
+    height: 2000px;
+    width: 400px;
+}

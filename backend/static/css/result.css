@@ -106,3 +106,10 @@
     border: 1px solid #dee2e6;
   }
 
+  .comment-cont{
+    text-align: center;
+    width: 100%;
+    font-size: 35pt;
+    padding-top: 20px;
+    font-weight: bolder;
+  }

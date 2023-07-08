@@ -51,7 +51,7 @@
     height: 100%;
 }
 
-.meta-cont{
+.cont{
     font-size: 10pt;
     margin-top: 15px;
     margin-bottom: 15px;
@@ -106,3 +106,10 @@
     border: 1px solid #dee2e6;
   }
 
+  .comment-cont{
+    text-align: center;
+    width: 100%;
+    font-size: 35pt;
+    padding-top: 20px;
+    font-weight: bolder;
+  }

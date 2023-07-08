@@ -10,7 +10,7 @@ import datetime
 from geopy.distance import geodesic
 import re
 
-openai.api_key = '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'
+openai.api_key = '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'
 
 
 
@@ -110,19 +110,14 @@ def summarize_report(report):
     prompt = ''' 
                 I need a summary of this report. Here is the report "{}".  The summary should answer the following questions
                 1. Which place did the reported event occur?
+                2. What year did the event occur?
+                3. What month did the event occur?
+                4. What day did the event occur?
+                5. What hour did the event occur?
+                6. What minute did the event occur?
+                7. Did the event happen in AM or PM?
                 
-                If todays timestamp is {} then 
-                
-                2. Compute or infer from the report the year the reported event occur. 
-                You can use keywords in the report such as today, tommorrow etc and use the todays timstamp as reference date.
-                
-                3. Compute from the report the Month name the event occur?
-                4. Compute from the report the Day name the event occur?
-                5. Compute from the report the hour the event occur?
-                6. Compute from the report the minute the event occur?
-                7. Compute from the report if the event happen in AM or PM?
-                8. What is the Latitude and longitude of the place where the event occured?
-                
+                Note that todays timestamp is {} then
                 
                 Here is the instruction for answering the questions; 
                 

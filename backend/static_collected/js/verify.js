@@ -92,23 +92,51 @@ async function get_enc_key() {
 
   function get_result(raw_data) {
     if (raw_data) {
-      $.post('api/compare', {'meta': raw_data, 'report': $(".report").val()}, function(result) {
-        // Use the global 'report' variable explicitly
-        report['compare'] = {
-          'success': true, 
-          'message': result
+      $.ajax({
+        url: 'api/compare', 
+        type: 'POST',
+        data: {'meta': raw_data, 'report': $(".report").val()},
+        contentType: false,
+        processData: false,
+
+        beforeSend: function() {
+          show_modal('Comparing Metadata information with Report Information')
+        },
+
+        success: function(result) {
+
+          // Use the global 'report' variable explicitly
+          report['compare'] = {
+            'success': true, 
+            'message': result
+          }
+
+          hide_modal()
+    
+          // Convert the JSON object to a string
+          var reportData = JSON.stringify(report);
+    
+          // Store the string in localStorage
+          localStorage.setItem('report', reportData);
+  
+          // redirect to the result page
+          window.location.href = 'result';
+  
+        },
+
+        error: function(xhr, status, error) {
+          // Handle any errors
+          console.error(xhr, status, error);
+          Swal.fire({
+            title: 'Error',
+            text: 'Error Comparing metadata information with image information',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3000
+          });
         }
-  
-        // Convert the JSON object to a string
-        var reportData = JSON.stringify(report);
-  
-        // Store the string in localStorage
-        localStorage.setItem('report', reportData);
+      });
 
-        // redirect to the result page
-        window.location.href = 'result';
-
-      })
     } else {
       // Use the global 'report' variable explicitly
       report['compare'] = {
@@ -123,6 +151,8 @@ async function get_enc_key() {
       localStorage.setItem('report', reportData);
     }
   }
+
+
 
 $(document).ready(function() {
     // Listen for the change event on the file input element
@@ -208,14 +238,23 @@ $('.verify-btn').on('click', function(e){
         data: formData,
         contentType: false,
         processData: false,
+
+        beforeSend: function() {
+          show_modal('Verifying Image Authenticity')
+        },
+
         success: function(response) {
             report['auth'] = {
                 'success': true, 
                 'message': response.message
             }
 
+            hide_modal()
+
+            $('.load-modal').show()
             get_result(raw_data, report)
         },
+
         error: function(xhr, status, error) {
           // Handle any errors
           console.error(xhr, status, error);

@@ -5,11 +5,17 @@ if(report){
     display_manipulation_report(report)
     display_location_report(report)
     display_time_report(report)
-
-    console.log(report)
+    compute_general_report()
 }else{
     window.location.href = 'verify'
 }
+
+// Add event listener to the window's beforeunload event
+window.addEventListener('beforeunload', function() {
+    // Remove the item from localStorage
+    localStorage.removeItem('report');
+});
+  
 
 
 function display_meta_report(report) {
@@ -27,25 +33,21 @@ function display_meta_report(report) {
 }
 
 function display_manipulation_report(report) {
-    alert()
     meta_report = report['auth']
 
     if (meta_report['success']) {
         if(meta_report['message'] >= 0.4){
             $('.manipulated-cont').text('The attached image has been manipulated. ')
             $('.manipulated .mark-icon img').attr('src', '/static/images/cross.png');
-            $('.manipulated .mark-perc').text((100 - parseFloat(meta_report['message'])).toFixed(2) + '%');
+            $('.manipulated .mark-perc').text((1 - parseFloat(meta_report['message'])).toFixed(4) * 100 + '%');
         }else if (meta_report['message'] < 0.1) {
             $('.manipulated-cont').text('The attached image has been verified to be VERY authentic. ')
             $('.manipulated .mark-icon img').attr('src', '/static/images/correct.png');
-            $('.manipulated .mark-perc').text((100 - parseFloat(meta_report['message'])).toFixed(2) + '%');
+            $('.manipulated .mark-perc').text((1 - parseFloat(meta_report['message'])).toFixed(4) * 100 + '%');
         }else if (meta_report['message'] < 0.2) {
             $('.manipulated-cont').text('The attached image has been verified to be authentic. ')
             $('.manipulated .mark-icon img').attr('src', '/static/images/correct.png');
-            $('.manipulated .mark-perc').text((100 - parseFloat(meta_report['message'])).toFixed(2) + '%');
-            $('.manipulated-cont').text('The attached image has been verified to be WEAKLY authentic. ')
-            $('.manipulated .mark-icon img').attr('src', '/static/images/correct.png');
-            $('.manipulated .mark-perc').text((100 - parseFloat(meta_report['message'])).toFixed(2) + '%');
+            $('.manipulated .mark-perc').text((1 - parseFloat(meta_report['message'])).toFixed(4) * 100 + '%');
         }
     } else{
         $('.manipulated-cont').text(meta_report['message'])
@@ -58,10 +60,7 @@ function display_location_report(report){
     meta_report = report['compare']
     if(meta_report['success']){
         success_vals = meta_report['message']
-        var match_pattern = /^[A-Za-z\s]+$/;
-
-        var matches = success_vals['results'][0].match(match_pattern);
-        var extractedMatch = matches[0].toLowerCase();
+        var extractedMatch = success_vals['results'][0];
 
         html = `
                     <table class="table table-bordered table-striped">
@@ -92,7 +91,6 @@ function display_location_report(report){
             $('.location .mark-perc').text('0%');
         }
         
-        console.log(meta_report['message'])
     }else{
         $('.loc-cont').text(meta_report['message'])
     }
@@ -102,42 +100,36 @@ function display_time_report(report) {
     meta_report = report['compare']
     if(meta_report['success']){
         success_vals = meta_report['message']
-        var match_pattern = /^[A-Za-z\s]+$/;
-        var match_pattern_perc = /\d+%/;
 
         // matching year 
-        var year_matches = success_vals['results'][1].match(match_pattern);
-        var year_extractedMatch = year_matches[0].toLowerCase();
+        var year_extractedMatch = success_vals['results'][1]
 
         // matching month 
-        var month_matches = success_vals['results'][2].match(match_pattern);
-        var month_extractedMatch = month_matches[0].toLowerCase();
+        var month_extractedMatch = success_vals['results'][2];
 
         // matching day 
-        var day_matches = success_vals['results'][3].match(match_pattern);
-        var day_extractedMatch = day_matches[0].toLowerCase();
+        var day_extractedMatch = success_vals['results'][3];
 
-        // matching hour percentage 
-        var hour_matches = success_vals['results'][4].match(match_pattern_perc);
-        if(hour_matches){
-            var hour_extractedMatch = hour_matches[0];
+        // matching hour percentage
+
+        if (success_vals['results'][4] != 'unknown'){
+            var hour_extractedMatch = success_vals['results'][4];
         }else{
-            var hour_extractedMatch = 'false';
+            hour_extractedMatch = false
         }
         
         // matching min percentage 
-        var min_matches = success_vals['results'][5].match(match_pattern_perc);
-        if(min_matches){
-            var min_extractedMatch = min_matches[0];
+        if(success_vals['results'][5] != 'unknown'){
+            var min_extractedMatch = success_vals['results'][5];
         }else{
             var min_extractedMatch = 'false';
         }
 
         // matching period 
-        var per_matches = success_vals['results'][6].match(match_pattern);
-        var per_extractedMatch = per_matches[0].toLowerCase();
-
-        total_perc = compute_percentage([year_extractedMatch, month_extractedMatch, day_extractedMatch, hour_extractedMatch, min_extractedMatch, per_extractedMatch])
+        var per_extractedMatch = success_vals['results'][6];
+        weights = [5, 5, 3, 5, 1, 1]
+        total_perc = compute_percentage([year_extractedMatch, month_extractedMatch, day_extractedMatch, hour_extractedMatch, min_extractedMatch, per_extractedMatch], weights)
+        
 
         html = `
                     <table class="table table-bordered table-striped">
@@ -197,6 +189,8 @@ function display_time_report(report) {
 
         if(Math.round(total_perc) > 90){
             $('.time .mark-icon img').attr('src', '/static/images/correct.png'); 
+        }else if(Math.round(total_perc) < 50){
+            $('.time .mark-icon img').attr('src', '/static/images/cross.png');
         }else{
             $('.time .mark-icon img').attr('src', '/static/images/verify.png');
         }
@@ -206,17 +200,36 @@ function display_time_report(report) {
     }
 }
 
-function compute_percentage(list_values){
+function compute_general_report(){
+    values = [
+            parseFloat($('.meta-data .mark-perc')[0].innerHTML),
+            parseFloat($('.manipulated .mark-perc')[0].innerHTML),
+            parseFloat($('.location .mark-perc')[0].innerHTML),
+            parseFloat($('.time .mark-perc')[0].innerHTML)
+            
+    ]
+
+    weights = [5, 3, 3, 2]
+
+    total_perc = compute_percentage(values, weights)
+
+    $('.comment-cont').text(Math.round(total_perc) + '%')
+
+}
+
+function compute_percentage(list_values, weights){
     total_percent = 0
     for(var i = 0; i < list_values.length; i++){
-        var perc =  parseInt(list_values[i])
+        var perc =  parseInt(list_values[i]) * weights[i]
         if(perc){
             total_percent += perc
-        }else if(list_values[i] == 'true'){
-            total_percent += 100
-        }else if(list_values[i] == 'false'){
+        }else if(list_values[i] === true){
+            total_percent += (100 * weights[i])
+        }else if(list_values[i] === false){
             total_percent += 0
         }
+
     }
-    return total_percent / list_values.length
+    const sum = weights.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    return total_percent / sum
 }

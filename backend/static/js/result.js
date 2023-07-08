@@ -5,11 +5,17 @@ if(report){
     display_manipulation_report(report)
     display_location_report(report)
     display_time_report(report)
-
-    console.log(report)
+    compute_general_report()
 }else{
     window.location.href = 'verify'
 }
+
+// Add event listener to the window's beforeunload event
+window.addEventListener('beforeunload', function() {
+    // Remove the item from localStorage
+    localStorage.removeItem('report');
+});
+  
 
 
 function display_meta_report(report) {
@@ -29,16 +35,18 @@ function display_meta_report(report) {
 function display_manipulation_report(report) {
     meta_report = report['auth']
 
-    if (meta_report['success']) {
-        if(meta_report['message'] >= 0.4){
+    console.log(meta_report['message'][0])
+
+    if(meta_report['success']) {
+        if(meta_report['message'][0] >= 0.4){
             $('.manipulated-cont').text('The attached image has been manipulated. ')
             $('.manipulated .mark-icon img').attr('src', '/static/images/cross.png');
             $('.manipulated .mark-perc').text((1 - parseFloat(meta_report['message'])).toFixed(4) * 100 + '%');
-        }else if (meta_report['message'] < 0.1) {
+        }else if (meta_report['message'][0] < 0.1) {
             $('.manipulated-cont').text('The attached image has been verified to be VERY authentic. ')
             $('.manipulated .mark-icon img').attr('src', '/static/images/correct.png');
             $('.manipulated .mark-perc').text((1 - parseFloat(meta_report['message'])).toFixed(4) * 100 + '%');
-        }else if (meta_report['message'] < 0.2) {
+        }else if (meta_report['message'][0] < 0.4) {
             $('.manipulated-cont').text('The attached image has been verified to be authentic. ')
             $('.manipulated .mark-icon img').attr('src', '/static/images/correct.png');
             $('.manipulated .mark-perc').text((1 - parseFloat(meta_report['message'])).toFixed(4) * 100 + '%');
@@ -85,9 +93,9 @@ function display_location_report(report){
             $('.location .mark-perc').text('0%');
         }
         
-        console.log(meta_report['message'])
     }else{
         $('.loc-cont').text(meta_report['message'])
+        $('.location .mark-icon img').attr('src', '/static/images/cross.png');
     }
 }
 
@@ -122,9 +130,10 @@ function display_time_report(report) {
 
         // matching period 
         var per_extractedMatch = success_vals['results'][6];
+        weights = [5, 5, 3, 5, 1, 1]
+        total_perc = compute_percentage([year_extractedMatch, month_extractedMatch, day_extractedMatch, hour_extractedMatch, min_extractedMatch, per_extractedMatch], weights)
+        
 
-        total_perc = compute_percentage([year_extractedMatch, month_extractedMatch, day_extractedMatch, hour_extractedMatch, min_extractedMatch, per_extractedMatch])
-        console.log(total_perc)
         html = `
                     <table class="table table-bordered table-striped">
                         <thead class="table-dark">
@@ -191,22 +200,40 @@ function display_time_report(report) {
 
     }else{
         $('.time-cont').text(meta_report['message'])
+        $('.time .mark-icon img').attr('src', '/static/images/cross.png');
     }
 }
 
-function compute_percentage(list_values){
-    console.log(list_values)
+function compute_general_report(){
+    values = [
+            parseFloat($('.meta-data .mark-perc')[0].innerHTML),
+            parseFloat($('.manipulated .mark-perc')[0].innerHTML),
+            parseFloat($('.location .mark-perc')[0].innerHTML),
+            parseFloat($('.time .mark-perc')[0].innerHTML)
+            
+    ]
+
+    weights = [5, 3, 3, 2]
+
+    total_perc = compute_percentage(values, weights)
+
+    $('.comment-cont').text(Math.round(total_perc) + '%')
+
+}
+
+function compute_percentage(list_values, weights){
     total_percent = 0
     for(var i = 0; i < list_values.length; i++){
-        var perc =  parseInt(list_values[i])
+        var perc =  parseInt(list_values[i]) * weights[i]
         if(perc){
             total_percent += perc
         }else if(list_values[i] === true){
-            total_percent += 100
+            total_percent += (100 * weights[i])
         }else if(list_values[i] === false){
             total_percent += 0
         }
-        console.log(total_percent)
+
     }
-    return total_percent / list_values.length
+    const sum = weights.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    return total_percent / sum
 }
